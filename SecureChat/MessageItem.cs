@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Security.Cryptography;
+using Windows.Security.Cryptography.Core;
+using Windows.Storage.Streams;
 
 namespace SecureChat
 {
@@ -13,17 +16,38 @@ namespace SecureChat
         string timeStamp;
         Boolean isEncrypted;
 
-        public void storeData(string msg, string theUser, string sentTime, Boolean secured)
+        public void storeData(string msg, string theUser, string sentTime, Boolean isSecured, IBuffer publicKey)
         {
-            this.message = msg;
             this.userid = theUser;
             this.timeStamp = sentTime;
-            this.isEncrypted = secured;
+            this.isEncrypted = isSecured;
+            if(this.isEncrypted == false)
+            {
+                this.message = msg;
+            } else
+            {
+                this.message = Crypto.Encrypt(App.strAsymmetricAlgName, publicKey, msg);
+            }
         }
 
         public string messageText()
         {
             string output = "(" + this.timeStamp + ")" + " " + this.userid + ": " + this.message;
+            return output;
+        }
+
+        public string messageTextDecrypt()
+        {
+            string output;
+            if (this.isEncrypted == true)
+            {
+                String decryptedMessage = Crypto.Decrypt(App.strAsymmetricAlgName, Crypto.returnPrivateKey(App.secrets), this.message);
+                output = "(" + this.timeStamp + ")" + " " + this.userid + ": " + "**DECRYPTED MESSAGE**:  " + decryptedMessage;
+            }
+            else {
+                output = "(" + this.timeStamp + ")" + " " + this.userid + ": " + this.message;
+            }
+
             return output;
         }
 

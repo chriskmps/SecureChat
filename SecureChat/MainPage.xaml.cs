@@ -31,8 +31,7 @@ namespace SecureChat
         {
             this.InitializeComponent();
             //Populate User List
-            Crypto secrets = new Crypto();
-            secrets.initCrypto();
+            App.secrets.initCrypto();
             foreach (string x in App.Users)
             {
                 currentUserList.Items.Add(x);
@@ -50,7 +49,7 @@ namespace SecureChat
                 //Store text from input box and associated data into MessageItem object
                 MessageItem newMessage = new MessageItem();
                 String timeStamp = DateTime.Now.ToString("MM/d/yy h:mm tt");           //Should this be generated locally or on backend?
-                newMessage.storeData(input, App.currentUser, timeStamp, secureStatus);
+                newMessage.storeData(input, App.currentUser, timeStamp, secureStatus, Crypto.returnPublicKey(App.secrets));
 
                 //Store that MessageItem object into chatListView list using a ListViewItem object
                 ListViewItem item = new ListViewItem();
@@ -112,6 +111,21 @@ namespace SecureChat
                 chatWindowBackground.Background = new SolidColorBrush(Windows.UI.Colors.Red);
                 buttonSecure.Background = new SolidColorBrush(Windows.UI.Colors.Green);
                 buttonSecure.Content = "Unsecure";
+            }
+        }
+
+        private void buttonDecrypt_Click(object sender, RoutedEventArgs e)
+        {
+            ListViewItem temp = (ListViewItem) chatListView.SelectedItems[0];
+            if(temp != null)
+            {
+                MessageItem msg = (MessageItem)temp.Tag;
+                string encryptedMessage = msg.returnObject_message(msg);
+                if (msg.returnObject_isEncrypted(msg) == true)
+                {
+                    String decryptedMessage = Crypto.Decrypt(App.strAsymmetricAlgName, Crypto.returnPrivateKey(App.secrets), encryptedMessage);
+                    temp.Content = "(" + msg.returnObject_timeStamp(msg) + ")" + " " + msg.returnObject_userid(msg) + ": " + "**DECRYPTED MESSAGE**:  " + decryptedMessage;
+                }
             }
         }
     }

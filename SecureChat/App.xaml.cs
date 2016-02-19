@@ -14,6 +14,9 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Windows.Security.Cryptography;
+using Windows.Security.Cryptography.Core;
+using Windows.Storage.Streams;
 
 namespace SecureChat
 {
@@ -26,7 +29,8 @@ namespace SecureChat
         internal static string[] Users = { "Chris", "Bob" }; // cannot change
         internal static string currentUser = "TempUser";
         internal static Boolean isSecureEnabled = false;
-
+        internal static string strAsymmetricAlgName = AsymmetricAlgorithmNames.RsaPkcs1;
+        internal static Crypto secrets = new Crypto();
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
