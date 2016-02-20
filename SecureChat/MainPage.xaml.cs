@@ -116,15 +116,17 @@ namespace SecureChat
 
         private void buttonDecrypt_Click(object sender, RoutedEventArgs e)
         {
-            ListViewItem temp = (ListViewItem) chatListView.SelectedItems[0];
-            if(temp != null)
-            {
-                MessageItem msg = (MessageItem)temp.Tag;
-                string encryptedMessage = msg.returnObject_message(msg);
-                if (msg.returnObject_isEncrypted(msg) == true)
+            if (chatListView.Items.Any() != false) { 
+                ListViewItem temp = (ListViewItem)chatListView.SelectedItems[0];
+                if (temp != null)
                 {
-                    String decryptedMessage = Crypto.Decrypt(App.strAsymmetricAlgName, Crypto.returnPrivateKey(App.secrets), encryptedMessage);
-                    temp.Content = "(" + msg.returnObject_timeStamp(msg) + ")" + " " + msg.returnObject_userid(msg) + ": " + "**DECRYPTED MESSAGE**:  " + decryptedMessage;
+                    MessageItem msg = (MessageItem)temp.Tag;
+                    string encryptedMessage = msg.returnObject_message(msg);
+                    if (msg.returnObject_isEncrypted(msg) == true)
+                    {
+                        String decryptedMessage = Crypto.Decrypt(App.strAsymmetricAlgName, Crypto.returnPrivateKey(App.secrets), encryptedMessage);
+                        temp.Content = "(" + msg.returnObject_timeStamp(msg) + ")" + " " + msg.returnObject_userid(msg) + ": " + "**DECRYPTED MESSAGE**:  " + decryptedMessage;
+                    }
                 }
             }
         }
