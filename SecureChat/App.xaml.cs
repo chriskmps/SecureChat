@@ -31,6 +31,7 @@ namespace SecureChat
         internal static Boolean isSecureEnabled = false;
         internal static string strAsymmetricAlgName = AsymmetricAlgorithmNames.RsaPkcs1;
         internal static Crypto secrets = new Crypto();
+        internal static Boolean DEBUG_MODE = true;
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().

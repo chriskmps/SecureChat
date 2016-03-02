@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -15,6 +16,11 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using Windows.Security.Cryptography;
 using System.Diagnostics;
+using Newtonsoft.Json;
+using Windows.Storage;
+using System.Net.Http;
+using System.Net.Http.Headers;
+
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -36,39 +42,131 @@ namespace SecureChat
             {
                 currentUserList.Items.Add(x);
             }
-
-
         }
 
 
         // Post from inputBox to chatListView
-        private void postMessage(String input, Boolean secureStatus)
+        private async void postMessage(String input, Boolean secureStatus)
         {
             if (input != String.Empty)
             {
                 //Store text from input box and associated data into MessageItem object
-                MessageItem newMessage = new MessageItem();
                 String timeStamp = DateTime.Now.ToString("MM/d/yy h:mm tt");           //Should this be generated locally or on backend?
-                newMessage.storeData(input, App.currentUser, timeStamp, secureStatus, Crypto.returnPublicKey(App.secrets));
+                String finalInput;
+                if(secureStatus == false) {
+                    finalInput = input;
+                } else {
+                    finalInput = Crypto.Encrypt(App.strAsymmetricAlgName, Crypto.returnPublicKey(App.secrets), input);
+                }
+                //Create new a instance of the newMesage Class and load it with the message data
+                MessageItem newMessage = new MessageItem { conversation= "http://159.203.252.197/conversations/2/", message = finalInput, userSent = "http://159.203.252.197/users/1/", timeStamp = timeStamp, userid = App.currentUser, isEncrypted = secureStatus };
+                
+                //Create a Key and Pair match with object data (prepared for POST request)
+                var values = new Dictionary<string, string>
+                {
+                    { "conversation", newMessage.returnObject_conversation(newMessage) },
+                    { "encrypted", newMessage.returnObject_isEncryptedString(newMessage) },
+                    { "sentTo", "http://159.203.252.197/users/1/" },
+                    { "text" , newMessage.returnObject_message(newMessage) }
 
-                //Store that MessageItem object into chatListView list using a ListViewItem object
+                };
+                var theContent = new FormUrlEncodedContent(values);
+
+
+                //POST request to server ("using" term creates a one time use instance of a class)
+                using (HttpClient client = new HttpClient()) //using block makes the object disposable (one time use)
+                {
+                    //Authentication data (Currently hardcoded)
+                    var byteArray = Encoding.ASCII.GetBytes("Chris:chris1234");
+                    var header = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
+                    client.DefaultRequestHeaders.Authorization = header;
+
+                    //Request and Response to server
+                    using (HttpResponseMessage response = await client.PostAsync("http://159.203.252.197/messages/", theContent))
+
+                    //View raw POST output here
+                    //using (HttpResponseMessage response = await client.PostAsync("http://posttestserver.com/post.php", theContent))
+
+                    {
+                        if (App.DEBUG_MODE)
+                        {
+                            Debug.WriteLine("POST Status Code:  " + response.StatusCode);
+                            Debug.WriteLine("POST Reason: " + response.ReasonPhrase);
+
+                            using (HttpContent content = response.Content)
+                            {
+                                string content_string = await content.ReadAsStringAsync();
+                                Debug.WriteLine("POST contents:  "+content_string);
+                            }
+                        }
+                    }
+                }
+
+                //GET request to server (fetch new messages from server at the same time)
+                using(HttpClient client = new HttpClient()) //using block makes the object disposable (one time use)
+                {
+                    using (HttpResponseMessage response = await client.GetAsync("http://159.203.252.197/messages"))
+                    {
+                        if (App.DEBUG_MODE)
+                        {
+                            Debug.WriteLine("GET Status Code:  " + response.StatusCode);
+                            Debug.WriteLine("GET Reason: " + response.ReasonPhrase);
+                        }
+                        using (HttpContent content = response.Content)
+                        {
+                            string content_string = await content.ReadAsStringAsync();
+                            System.Net.Http.Headers.HttpContentHeaders content_headers = content.Headers;
+                            if (App.DEBUG_MODE)
+                            {
+                                Debug.WriteLine("GET content:  " + content_string);
+                                Debug.WriteLine("GET content headers:  " + content_headers);
+                            }
+
+                            //TEMPORARY METHOD TO POST MESSAGES FROM SERVER TO CHAT VIEW
+                            List<MessageItem> incomingMessages = JsonConvert.DeserializeObject<List<MessageItem>>(content_string);
+                            for (int x = 0; x < incomingMessages.Count; x++)
+                            {
+                                ListViewItem incomingItems = new ListViewItem();
+                                incomingItems.Content = incomingMessages[x].messageText();                               //Outputs desired text into the actual chat window
+                                incomingItems.Tag = newMessage;                                                 //References the MessageItem object
+                                chatListView.Items.Add(incomingItems);
+                            }
+
+                            //MessageItem incomingMessages = JsonConvert.DeserializeObject<IEnumerable<MessageItem>>(content_string);
+                            Windows.Storage.StorageFolder storageFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
+                            string desiredName = "test3.json";
+                            //StorageFile newFile = await storageFolder.CreateFileAsync(desiredName);
+                            Windows.Storage.StorageFile sampleFile = await storageFolder.GetFileAsync("test3.json");
+                            await Windows.Storage.FileIO.WriteTextAsync(sampleFile, content_string);
+
+                            //String JSON_msg = JsonConvert.DeserializeObject(content);
+                        }
+                    }
+                }
+                
+                //*TEST* Storage 
+               /* Windows.Storage.StorageFolder storageFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
+                string desiredName = "test3.json";
+                //StorageFile newFile = await storageFolder.CreateFileAsync(desiredName);
+                Windows.Storage.StorageFile sampleFile = await storageFolder.GetFileAsync("test3.json");
+                await Windows.Storage.FileIO.WriteTextAsync(sampleFile, JSON_msg);*/
+                
+                //Update the Chat window by adding newMessage object to the chatListView list view  
                 ListViewItem item = new ListViewItem();
                 item.Content = newMessage.messageText();                               //Outputs desired text into the actual chat window
                 item.Tag = newMessage;                                                 //References the MessageItem object
                 chatListView.Items.Add(item);
                 inputBox.Text = "";                                                    //Reset input text field to empty
-
-                
             }
         }
 
-        private void buttonSend_Click(object sender, RoutedEventArgs e)
+        private async void buttonSend_Click(object sender, RoutedEventArgs e)
         {
             string newMsg = inputBox.Text;
             postMessage(newMsg, App.isSecureEnabled);
         }
 
-        private void inputBox_KeyDown(object sender, KeyRoutedEventArgs e)
+        private async void inputBox_KeyDown(object sender, KeyRoutedEventArgs e)
         {
             if(e.Key == Windows.System.VirtualKey.Enter)
             {
@@ -92,8 +190,6 @@ namespace SecureChat
             friendsList.Items.Add(msg.returnObject_timeStamp(msg));
             friendsList.Items.Add(msg.returnObject_userid(msg));
             friendsList.Items.Add(msg.returnObject_isEncrypted(msg).ToString());
-
-
         }
 
         private void buttonSecure_Click(object sender, RoutedEventArgs e)

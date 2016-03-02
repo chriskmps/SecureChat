@@ -6,28 +6,48 @@ using System.Threading.Tasks;
 using Windows.Security.Cryptography;
 using Windows.Security.Cryptography.Core;
 using Windows.Storage.Streams;
+using Newtonsoft.Json;
 
 namespace SecureChat
 {
     public class MessageItem
     {
-        string message;
-        string userid;
-        string timeStamp;
-        Boolean isEncrypted;
+        [JsonProperty("conversation")]
+       public string conversation { get; set; }
 
-        public void storeData(string msg, string theUser, string sentTime, Boolean isSecured, IBuffer publicKey)
+        [JsonProperty("sentTime")]
+        public string timeStamp { get; set; }
+
+        [JsonProperty("encrypted")]
+        public Boolean isEncrypted { get; set; }
+
+        [JsonProperty("sentTo")]
+        public string userSent { get; set; }
+
+        [JsonProperty("text")]
+        public string message { get; set; }
+
+        [JsonIgnoreAttribute]
+        public string userid { get; set; }
+
+
+       /* public void storeData(string msg, string theUser, string sentTime, Boolean isSecured, IBuffer publicKey)
         {
             this.userid = theUser;
             this.timeStamp = sentTime;
             this.isEncrypted = isSecured;
-            if(this.isEncrypted == false)
-            {
-                this.message = msg;
-            } else
-            {
-                this.message = Crypto.Encrypt(App.strAsymmetricAlgName, publicKey, msg);
-            }
+            //if(this.isEncrypted == false)
+            //{
+            //    this.message = msg;
+            //} else
+            //{
+            //    this.message = Crypto.Encrypt(App.strAsymmetricAlgName, publicKey, msg);
+            //}
+        }*/
+
+        public override string ToString()
+        {
+            return string.Format("conversation: {0}, timeStamp: {1}, encrypted: {2}, sentTo {3}, text: {4}", conversation, timeStamp, isEncrypted, "http://159.203.252.197/users/1/",message);
         }
 
         public string messageText()
@@ -51,6 +71,10 @@ namespace SecureChat
             return output;
         }
 
+        public string returnObject_conversation(MessageItem anItem)
+        {
+            return anItem.conversation;
+        }
         public string returnObject_message(MessageItem anItem)
         {
             return anItem.message;
@@ -62,6 +86,10 @@ namespace SecureChat
         public string returnObject_timeStamp(MessageItem anItem)
         {
             return anItem.timeStamp;
+        }
+        public string returnObject_isEncryptedString(MessageItem anItem)
+        {
+            return anItem.isEncrypted.ToString();
         }
         public Boolean returnObject_isEncrypted(MessageItem anItem)
         {
