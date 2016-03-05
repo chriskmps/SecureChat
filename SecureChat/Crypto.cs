@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Windows.Security.Cryptography;
 using Windows.Security.Cryptography.Core;
 using Windows.Storage.Streams;
+using Windows.Storage;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace SecureChat
 {
@@ -16,21 +18,54 @@ namespace SecureChat
         UInt32 asymmetricKeyLength;
         IBuffer buffPublicKey;
         IBuffer buffPrivateKeyStorage;
+        byte[] publicKeyByteVersion = new byte[512];
 
         //Initialize the new Crypto object (initialized only once per app startup)
-        public void initCrypto()
+        public async void initCrypto()
         {
             this.strAsymmetricAlgName = AsymmetricAlgorithmNames.RsaPkcs1;
             this.asymmetricKeyLength = 512;
 
             //Checks SecureChat's folder if a key pair already exists and set keyPairExists boolean
-            this.keyPairExists = false;
-            if (this.keyPairExists == true)
-            {
-                // set object to existing data
-            } else
-            {
-                this.CreateAsymmetricKeyPair(strAsymmetricAlgName, asymmetricKeyLength, out buffPublicKey, out buffPrivateKeyStorage);
+            Windows.Storage.StorageFolder localAppFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
+            string cryptoFilePrivate = "SecureChatPrivateKeys.sckey";  //STORED AS BYTE DATA
+            string cryptoFilePublic = "SecureChatPublicKey.sckey";     //STORED AS TEXT DATA
+            if ((await localAppFolder.TryGetItemAsync(cryptoFilePublic) != null) && (await localAppFolder.TryGetItemAsync(cryptoFilePrivate) != null)) {
+                this.keyPairExists = true;
+            } else {
+                this.keyPairExists = false;
+            }
+            //Load Keys depending on keyPairExists value
+            if (this.keyPairExists == true) {
+                //DIRECT IBUFFER
+                //StorageFile loadedCryptoFilePublic = await localAppFolder.GetFileAsync(cryptoFilePublic);
+                //this.buffPublicKey = await FileIO.ReadBufferAsync(loadedCryptoFilePublic);
+
+                //FROM BYTE
+                //StorageFile loadedCryptoFilePublic = await localAppFolder.GetFileAsync("BytePubKey.sckey");
+                //this.buffPublicKey = await FileIO.ReadBufferAsync(loadedCryptoFilePublic);
+
+                //Open Public Key File.  Convert key from STRING to BYTE and then convert to IBUFFER
+                StorageFile loadedCryptoFilePublic = await localAppFolder.GetFileAsync(cryptoFilePublic);
+                String publicKeyStringVersion = await FileIO.ReadTextAsync(loadedCryptoFilePublic);
+                this.publicKeyByteVersion = Convert.FromBase64String(publicKeyStringVersion);
+                this.buffPublicKey = this.publicKeyByteVersion.AsBuffer();
+
+                //Open Private Key File
+                StorageFile loadedCryptoFilePrivate = await localAppFolder.GetFileAsync(cryptoFilePrivate);
+                this.buffPrivateKeyStorage = await FileIO.ReadBufferAsync(loadedCryptoFilePrivate);
+
+            } else {
+                //Generate new key pair
+                CryptographicKey temp = this.CreateAsymmetricKeyPair(strAsymmetricAlgName, asymmetricKeyLength, out buffPublicKey, out buffPrivateKeyStorage);
+
+                //Convert public key from IBUFFER type to BYTE type.  Convert from BYTE type to STRING type
+                WindowsRuntimeBufferExtensions.CopyTo(this.buffPublicKey, this.publicKeyByteVersion);
+                string publicKeyStringVersion = Convert.ToBase64String(this.publicKeyByteVersion);
+
+                //Store keys in appropriate files (Public as PLAIN TEXT, Private as IBUFFER)
+                await FileIO.WriteTextAsync((await localAppFolder.CreateFileAsync(cryptoFilePublic)), publicKeyStringVersion);
+                await FileIO.WriteBufferAsync((await localAppFolder.CreateFileAsync(cryptoFilePrivate)), this.buffPrivateKeyStorage);
             }
         }
 
@@ -85,9 +120,14 @@ namespace SecureChat
 
             //Convert message String to IBuffer
             IBuffer convertedString = CryptographicBuffer.DecodeFromBase64String(encryptedMessage);
-
-            // Use the private key embedded in the key pair to decrypt the session key.
-            IBuffer buffDecryptedMessage = CryptographicEngine.Decrypt(keyPair, convertedString, null);
+            IBuffer buffDecryptedMessage;
+            try {
+                // Use the private key embedded in the key pair to decrypt the session key.
+                buffDecryptedMessage = CryptographicEngine.Decrypt(keyPair, convertedString, null);
+            } catch (System.ArgumentException) {
+                string invalidDecryptionMessage = "INVALID DECRYPTION KEY";
+                return invalidDecryptionMessage;
+            }
 
             //Return decrpyted message as a string
             string decryptedMessage = CryptographicBuffer.ConvertBinaryToString(BinaryStringEncoding.Utf8, buffDecryptedMessage);
@@ -96,7 +136,7 @@ namespace SecureChat
         
 
         //Generates a new asymmetric key pair if keypair file does not exist (Credit to MDSN Microsoft Libraries)
-        public void CreateAsymmetricKeyPair(String strAsymmetricAlgName, UInt32 keyLength, out IBuffer buffPublicKey, out IBuffer buffPrivateKeyStorage)
+        public CryptographicKey CreateAsymmetricKeyPair(String strAsymmetricAlgName, UInt32 keyLength, out IBuffer buffPublicKey, out IBuffer buffPrivateKeyStorage)
         {
             // Open the algorithm provider for the specified asymmetric algorithm.
             AsymmetricKeyAlgorithmProvider objAlgProv = AsymmetricKeyAlgorithmProvider.OpenAlgorithm(strAsymmetricAlgName);
@@ -114,6 +154,7 @@ namespace SecureChat
             // the purposes of this example, however, we're just copying it into a
             // static class variable for later use during decryption.
             buffPrivateKeyStorage = keyPair.Export();
+            return keyPair;
         }
     }
 }

@@ -91,6 +91,10 @@ namespace SecureChat
         {
             return anItem.isEncrypted.ToString();
         }
+        public string returnObject_userSent(MessageItem anItem)
+        {
+            return anItem.userSent;
+        }
         public Boolean returnObject_isEncrypted(MessageItem anItem)
         {
             return anItem.isEncrypted;

@@ -38,12 +38,48 @@ namespace SecureChat
             this.InitializeComponent();
             //Populate User List
             App.secrets.initCrypto();
+            loadLastConversation();
             foreach (string x in App.Users)
             {
                 currentUserList.Items.Add(x);
             }
         }
 
+        private async void loadLastConversation()
+        {
+            //GET request to server (fetch new messages from server at the same time)
+            using (HttpClient client = new HttpClient()) //using block makes the object disposable (one time use)
+            {
+                using (HttpResponseMessage response = await client.GetAsync("http://159.203.252.197/messages"))
+                {
+                    if (App.DEBUG_MODE)
+                    {
+                        Debug.WriteLine("GET Status Code:  " + response.StatusCode);
+                        Debug.WriteLine("GET Reason: " + response.ReasonPhrase);
+                    }
+                    using (HttpContent content = response.Content)
+                    {
+                        string content_string = await content.ReadAsStringAsync();
+                        System.Net.Http.Headers.HttpContentHeaders content_headers = content.Headers;
+                        if (App.DEBUG_MODE)
+                        {
+                            Debug.WriteLine("GET content:  " + content_string);
+                            Debug.WriteLine("GET content headers:  " + content_headers);
+                        }
+
+                        //TEMPORARY METHOD TO POST MESSAGES FROM SERVER TO CHAT VIEW
+                        List<MessageItem> incomingMessages = JsonConvert.DeserializeObject<List<MessageItem>>(content_string);
+                        for (int x = 0; x < incomingMessages.Count; x++)
+                        {
+                            ListViewItem incomingItems = new ListViewItem();
+                            incomingItems.Content = incomingMessages[x].messageText();                      //Outputs desired text into the actual chat window
+                            incomingItems.Tag = incomingMessages[x];                                                 //References the MessageItem object
+                            chatListView.Items.Add(incomingItems);
+                        }
+                    }
+                }
+            }
+        }
 
         // Post from inputBox to chatListView
         private async void postMessage(String input, Boolean secureStatus)
@@ -102,8 +138,8 @@ namespace SecureChat
                     }
                 }
 
-                //GET request to server (fetch new messages from server at the same time)
-                using(HttpClient client = new HttpClient()) //using block makes the object disposable (one time use)
+                //GET request to server to update chatListView with recentely POSTed message
+                using (HttpClient client = new HttpClient()) //using block makes the object disposable (one time use)
                 {
                     using (HttpResponseMessage response = await client.GetAsync("http://159.203.252.197/messages"))
                     {
@@ -124,39 +160,21 @@ namespace SecureChat
 
                             //TEMPORARY METHOD TO POST MESSAGES FROM SERVER TO CHAT VIEW
                             List<MessageItem> incomingMessages = JsonConvert.DeserializeObject<List<MessageItem>>(content_string);
-                            for (int x = 0; x < incomingMessages.Count; x++)
-                            {
-                                ListViewItem incomingItems = new ListViewItem();
-                                incomingItems.Content = incomingMessages[x].messageText();                               //Outputs desired text into the actual chat window
-                                incomingItems.Tag = newMessage;                                                 //References the MessageItem object
-                                chatListView.Items.Add(incomingItems);
-                            }
-
-                            //MessageItem incomingMessages = JsonConvert.DeserializeObject<IEnumerable<MessageItem>>(content_string);
-                            Windows.Storage.StorageFolder storageFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
-                            string desiredName = "test3.json";
-                            //StorageFile newFile = await storageFolder.CreateFileAsync(desiredName);
-                            Windows.Storage.StorageFile sampleFile = await storageFolder.GetFileAsync("test3.json");
-                            await Windows.Storage.FileIO.WriteTextAsync(sampleFile, content_string);
-
-                            //String JSON_msg = JsonConvert.DeserializeObject(content);
+                            ListViewItem incomingItems = new ListViewItem();
+                            int lastMessage = incomingMessages.Count - 1;
+                            incomingItems.Content = incomingMessages[lastMessage].messageText();                      //Outputs desired text into the actual chat window
+                            incomingItems.Tag = incomingMessages[lastMessage];                                                 //References the MessageItem object
+                            chatListView.Items.Add(incomingItems);
                         }
                     }
                 }
-                
-                //*TEST* Storage 
-               /* Windows.Storage.StorageFolder storageFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
-                string desiredName = "test3.json";
-                //StorageFile newFile = await storageFolder.CreateFileAsync(desiredName);
-                Windows.Storage.StorageFile sampleFile = await storageFolder.GetFileAsync("test3.json");
-                await Windows.Storage.FileIO.WriteTextAsync(sampleFile, JSON_msg);*/
-                
-                //Update the Chat window by adding newMessage object to the chatListView list view  
+
+                /* //Update the Chat window by adding newMessage object to the chatListView list view (OLD) 
                 ListViewItem item = new ListViewItem();
                 item.Content = newMessage.messageText();                               //Outputs desired text into the actual chat window
                 item.Tag = newMessage;                                                 //References the MessageItem object
                 chatListView.Items.Add(item);
-                inputBox.Text = "";                                                    //Reset input text field to empty
+                inputBox.Text = "";                                                    //Reset input text field to empty */
             }
         }
 
@@ -188,7 +206,7 @@ namespace SecureChat
             friendsList.Items.Clear();
             friendsList.Items.Add(msg.returnObject_message(msg));
             friendsList.Items.Add(msg.returnObject_timeStamp(msg));
-            friendsList.Items.Add(msg.returnObject_userid(msg));
+            friendsList.Items.Add(msg.returnObject_userSent(msg));                            
             friendsList.Items.Add(msg.returnObject_isEncrypted(msg).ToString());
         }
 
