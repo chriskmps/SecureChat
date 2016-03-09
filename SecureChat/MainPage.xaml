@@ -15,15 +15,18 @@
                 
                 <StackPanel Orientation="Vertical" Width="320" Height="360" Background="#FF848484">
                     <TextBlock x:Name="currentUserSelection" Text="Current User"  Width="320" Height="40" FontFamily="Calibri" FontSize="29.333" FontWeight="Bold" TextAlignment="Center" SelectionHighlightColor="{x:Null}"/>
-                    <ScrollViewer HorizontalAlignment="Left" Height="300" Margin="10,0,0,0" VerticalAlignment="Center" Width="300" Background="White" FontFamily="Calibri" FontSize="21.333">
+                    <ScrollViewer HorizontalAlignment="Left" Height="150" Margin="10,0,0,0" VerticalAlignment="Center" Width="300" Background="White" FontFamily="Calibri" FontSize="21.333">
                         <ListView x:Name="currentUserList" BorderThickness="2" SelectionChanged="currentUserList_SelectionChanged"/>
                     </ScrollViewer>
+                    <TextBlock x:Name="currentUserPassword" Text="User Password"  Width="320" Height="40" FontFamily="Calibri" FontSize="29.333" FontWeight="Bold" TextAlignment="Center" SelectionHighlightColor="{x:Null}"/>
+                    <PasswordBox x:Name="currentUserPasswordActual"  Width="300"/>
+                    <Button x:Name="updatePublicKey" Content="Update Crypto Key" HorizontalAlignment="Left" Height="40" Margin="35,35,0,0" VerticalAlignment="Top" Width="242" Background="Orange" FontSize="22" FontWeight="Bold" Foreground="White" Click="updatePublicKey_Click"/>
                 </StackPanel>
                 
                 <StackPanel Orientation="Vertical" Width="320" Height="360" Background="#FF848484" >
-                    <TextBlock x:Name="currentFriendsSelection" Text="Friends (Test Debug)"  Width="320" Height="40" FontFamily="Calibri" FontSize="29.333" FontWeight="Bold" TextAlignment="Center" SelectionHighlightColor="{x:Null}"/>
+                    <TextBlock x:Name="currentFriendsSelection" Text="Conversations"  Width="320" Height="40" FontFamily="Calibri" FontSize="29.333" FontWeight="Bold" TextAlignment="Center" SelectionHighlightColor="{x:Null}"/>
                     <ScrollViewer HorizontalAlignment="Left" Height="300" Margin="10,0,0,0" VerticalAlignment="Center" Width="300" Background="White" FontFamily="Calibri" FontSize="21.333">
-                        <ListView x:Name="friendsList" BorderThickness="2"/>
+                        <ListView x:Name="friendsList" BorderThickness="2" SelectionChanged="friendsList_SelectionChanged"/>
                     </ScrollViewer>
                 </StackPanel>
                 

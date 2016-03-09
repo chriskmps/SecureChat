@@ -27,7 +27,7 @@ namespace SecureChat
         [JsonProperty("text")]
         public string message { get; set; }
 
-        [JsonIgnoreAttribute]
+        [JsonProperty("sentBy")]
         public string userid { get; set; }
 
 
@@ -75,26 +75,32 @@ namespace SecureChat
         {
             return anItem.conversation;
         }
+
         public string returnObject_message(MessageItem anItem)
         {
             return anItem.message;
         }
+
         public string returnObject_userid(MessageItem anItem)
         {
             return anItem.userid;
         }
+
         public string returnObject_timeStamp(MessageItem anItem)
         {
             return anItem.timeStamp;
         }
+
         public string returnObject_isEncryptedString(MessageItem anItem)
         {
             return anItem.isEncrypted.ToString();
         }
+
         public string returnObject_userSent(MessageItem anItem)
         {
             return anItem.userSent;
         }
+
         public Boolean returnObject_isEncrypted(MessageItem anItem)
         {
             return anItem.isEncrypted;

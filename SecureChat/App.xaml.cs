@@ -26,12 +26,23 @@ namespace SecureChat
     sealed partial class App : Application
     {
         //Global Variables
-        internal static string[] Users = { "Chris", "Bob" }; // cannot change
-        internal static string currentUser = "TempUser";
+        //internal static string[] Users = { "Chris", "Bob" }; // cannot change
+        //internal static string currentUser = "TempUser";
+
+        //Cryptography GLOBALS
         internal static Boolean isSecureEnabled = false;
         internal static string strAsymmetricAlgName = AsymmetricAlgorithmNames.RsaPkcs1;
         internal static Crypto secrets = new Crypto();
+
+        //User and Conversation GLOBALS
+        internal static UserAndConversation userManagement = new UserAndConversation();
+        internal static int conversationMessageCounter = 0;
+
+        //DEBUG MODE
         internal static Boolean DEBUG_MODE = true;
+
+
+
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().

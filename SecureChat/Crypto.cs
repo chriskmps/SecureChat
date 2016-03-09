@@ -7,6 +7,7 @@ using Windows.Security.Cryptography;
 using Windows.Security.Cryptography.Core;
 using Windows.Storage.Streams;
 using Windows.Storage;
+using System.Diagnostics;
 using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace SecureChat
@@ -16,6 +17,7 @@ namespace SecureChat
         Boolean keyPairExists;
         String strAsymmetricAlgName;
         UInt32 asymmetricKeyLength;
+        IBuffer buffPublicKey_OTHER_USER;
         IBuffer buffPublicKey;
         IBuffer buffPrivateKeyStorage;
         byte[] publicKeyByteVersion = new byte[512];
@@ -74,7 +76,16 @@ namespace SecureChat
 
 
 
+
 // Class functions
+        public void loadOtherUserPublicKey(string otherUserKey)
+        {
+            Debug.WriteLine("DISPLAY KEY:  "+otherUserKey);
+            byte[] tempByte = new byte[512];
+            tempByte = Convert.FromBase64String(otherUserKey);
+            buffPublicKey_OTHER_USER = tempByte.AsBuffer();
+        }
+
         public static IBuffer returnPublicKey(Crypto cryptoHolder)
         {
             return cryptoHolder.buffPublicKey;
@@ -87,13 +98,14 @@ namespace SecureChat
 
 
         //Encrypt Data (temporarily encrpyting with my own public key)
-        public static string Encrypt(String strAsymmetricAlgName, IBuffer buffPublicKey, string message)
+       // public static string Encrypt(String strAsymmetricAlgName, IBuffer buffPublicKey, string message
+        public static string Encrypt(String strAsymmetricAlgName, IBuffer buffPublicKey_OTHER_USER, string message)
         {
             //Load RSA.pkcs algorithm
             AsymmetricKeyAlgorithmProvider objAlgProv = AsymmetricKeyAlgorithmProvider.OpenAlgorithm(strAsymmetricAlgName);
 
             // Import the public key from a buffer.
-            CryptographicKey publicKey = objAlgProv.ImportPublicKey(buffPublicKey);
+            CryptographicKey publicKey = objAlgProv.ImportPublicKey(buffPublicKey_OTHER_USER);
 
             //Convert message String to IBuffer
             byte[] plainText = Encoding.UTF8.GetBytes(message); // Data to encrypt
@@ -156,5 +168,7 @@ namespace SecureChat
             buffPrivateKeyStorage = keyPair.Export();
             return keyPair;
         }
+
+
     }
 }
