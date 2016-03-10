@@ -311,13 +311,13 @@ namespace SecureChat
         //CURRENT USER SELECTION:  UPDATE CURRENT USER
         private void currentUserList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            chatListView.Items.Clear();
             ListViewItem temp = (ListViewItem) currentUserList.SelectedItems[0];
             friendsList.Items.Clear();
             App.userManagement.setCurrentUser((UserDetails)temp.Tag);
             App.userManagement.getAvailableConversations(friendsList);
             string selectedUser = (string) temp.Content;
             verifyKeys();
+            chatListView.Items.Clear();
         }
 
 
@@ -328,16 +328,22 @@ namespace SecureChat
         //CHATLISTVIEW SELECTION:  (DEBUG MODE)  OUTPUT CONTENTS OF CHAT OBJECT TO FRIENDS
         private void chatListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            ListViewItem temp = (ListViewItem) chatListView.SelectedItems[0];
-            MessageItem msg = (MessageItem) temp.Tag;
-            if (App.DEBUG_MODE == true)
+            try {
+                ListViewItem temp = (ListViewItem)chatListView.SelectedItems[0];
+                MessageItem msg = (MessageItem)temp.Tag;
+                if (App.DEBUG_MODE == true)
+                {
+                    friendsList.Items.Clear();
+                    friendsList.Items.Add("==DEBUG MODE OUTPUT==");
+                    friendsList.Items.Add(msg.returnObject_message(msg));
+                    friendsList.Items.Add(msg.returnObject_timeStamp(msg));
+                    friendsList.Items.Add(msg.returnObject_userSent(msg));
+                    friendsList.Items.Add(msg.returnObject_isEncrypted(msg).ToString());
+                }
+            }          
+            catch (System.Runtime.InteropServices.COMException)
             {
-                friendsList.Items.Clear();
-                friendsList.Items.Add("==DEBUG MODE OUTPUT==");
-                friendsList.Items.Add(msg.returnObject_message(msg));
-                friendsList.Items.Add(msg.returnObject_timeStamp(msg));
-                friendsList.Items.Add(msg.returnObject_userSent(msg));
-                friendsList.Items.Add(msg.returnObject_isEncrypted(msg).ToString());
+                //Band aid 
             }
         }
 
