@@ -22,7 +22,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using Windows.UI.Popups;
 using Windows.Storage.Streams;
-using Windows.Storage;
+
 
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
@@ -39,7 +39,10 @@ namespace SecureChat
         public MainPage()
         {
             this.InitializeComponent();
-            
+
+            Windows.UI.ViewManagement.ApplicationView.PreferredLaunchViewSize = new Size { Height = 720, Width = 1280 };
+            Windows.UI.ViewManagement.ApplicationView.PreferredLaunchWindowingMode = Windows.UI.ViewManagement.ApplicationViewWindowingMode.PreferredLaunchViewSize;
+
             //Initialize user list from Server
             App.userManagement.initUserAndConversation(currentUserList);
             //App.userManagement.getAvailableConversations(friendsList);
@@ -279,7 +282,7 @@ namespace SecureChat
 //USER INTERFECT METHODS
 
         //INPUT WINDOW CLICK POST
-        private async void buttonSend_Click(object sender, RoutedEventArgs e)
+        private void buttonSend_Click(object sender, RoutedEventArgs e)
         {
             string newMsg = inputBox.Text;
             postMessage(newMsg, App.isSecureEnabled);
@@ -291,7 +294,7 @@ namespace SecureChat
 
 
         //INPUT WINDOW ENTER POST
-        private async void inputBox_KeyDown(object sender, KeyRoutedEventArgs e)
+        private void inputBox_KeyDown(object sender, KeyRoutedEventArgs e)
         {
             if (e.Key == Windows.System.VirtualKey.Enter)
             {
