@@ -20,7 +20,7 @@
                     </ScrollViewer>
                     <TextBlock x:Name="currentUserPassword" Text="User Password"  Width="320" Height="40" FontFamily="Calibri" FontSize="29.333" FontWeight="Bold" TextAlignment="Center" SelectionHighlightColor="{x:Null}"/>
                     <PasswordBox x:Name="currentUserPasswordActual"  Width="300"/>
-                    <Button x:Name="updatePublicKey" Content="Update Crypto Key" HorizontalAlignment="Left" Height="40" Margin="35,35,0,0" VerticalAlignment="Top" Width="242" Background="Orange" FontSize="22" FontWeight="Bold" Foreground="White" Click="updatePublicKey_Click"/>
+                    <Button x:Name="updatePublicKey" Content="Update Crypto Key" HorizontalAlignment="Left" Height="40" Margin="10,35,0,0" VerticalAlignment="Top" Width="300" Background="#FF23238B" FontSize="22" FontWeight="Bold" Foreground="White" Click="updatePublicKey_Click"/>
                 </StackPanel>
                 
                 <StackPanel Orientation="Vertical" Width="320" Height="360" Background="#FF848484" >
@@ -35,7 +35,7 @@
             
             <StackPanel Orientation="Vertical" HorizontalAlignment="Right" >
                 <StackPanel x:Name="chatWindowBackground" Orientation="Horizontal" Width="960" Height="540"  Background="#FF326C32">
-                    <ScrollViewer HorizontalAlignment="Left" Height="500" Margin="15,0,0,0" VerticalAlignment="Center" Width="930" Background="White" FontFamily="Calibri" FontSize="21.333">
+                    <ScrollViewer x:Name="chatListViewScroller" HorizontalAlignment="Left" Height="500" Margin="15,0,0,0" VerticalAlignment="Center" Width="930" Background="White" FontFamily="Calibri" FontSize="21.333">
                         <ListView x:Name="chatListView" BorderThickness="2" SelectionChanged="chatListView_SelectionChanged"/>
                     </ScrollViewer>
                 </StackPanel>
@@ -51,9 +51,10 @@
                 		IsReadOnly="False" FontSize="21.333" FontFamily="Calibri"  KeyDown="inputBox_KeyDown" BorderBrush="{x:Null}" Background="White"/>
                     </StackPanel>
                     <StackPanel  Orientation="Horizontal" VerticalAlignment="Bottom" Height="60" Background="#FF848484">
-                        <Button x:Name="buttonSecure" Content="Secure" HorizontalAlignment="Left" Height="50" Margin="15,0,0,0" VerticalAlignment="Top" Width="242" Background="#FF861E1E" FontSize="32" FontWeight="Bold" Foreground="White" Click="buttonSecure_Click"/>
-                        <Button x:Name="buttonDecrypt" Content="Decrypt" HorizontalAlignment="Left" Height="50" Margin="15,0,0,0" VerticalAlignment="Top" Width="242" Background="#FF227030" FontSize="32" FontWeight="Bold" Foreground="White" Click="buttonDecrypt_Click"/>
-                        <Button x:Name="buttonSend" Content="Send" HorizontalAlignment="Left" Height="50" Margin="187,0,0,0" VerticalAlignment="Top" Width="242" Background="#FF23238B" FontSize="32" FontWeight="Bold" Foreground="#FFFFFCFC" Click="buttonSend_Click"/>
+                        <Button x:Name="buttonSecure" Content="Secure" HorizontalAlignment="Left" Height="50" Margin="15,0,0,0" VerticalAlignment="Top" Width="200" Background="#FF861E1E" FontSize="32" FontWeight="Bold" Foreground="White" Click="buttonSecure_Click"/>
+                        <Button x:Name="buttonDecrypt" Content="Decrypt" HorizontalAlignment="Left" Height="50" Margin="15,0,0,0" VerticalAlignment="Top" Width="200" Background="#FF227030" FontSize="32" FontWeight="Bold" Foreground="White" Click="buttonDecrypt_Click"/>
+                        <Button x:Name="refersh" Content="Refresh" HorizontalAlignment="Left" Height="50" Margin="195,0,0,0" VerticalAlignment="Top" Width="100" Background="#FF23238B" FontSize="20" FontWeight="Bold" Foreground="#FFFFFCFC" Click="refersh_Click"/>
+                        <Button x:Name="buttonSend" Content="Send" HorizontalAlignment="Left" Height="50" Margin="15,0,0,0" VerticalAlignment="Top" Width="200" Background="#FF23238B" FontSize="32" FontWeight="Bold" Foreground="#FFFFFCFC" Click="buttonSend_Click"/>
                     </StackPanel>
                 </StackPanel>
             </StackPanel>

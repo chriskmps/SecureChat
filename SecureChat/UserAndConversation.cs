@@ -157,7 +157,7 @@ namespace SecureChat
         }
 
         //Loads conversation for the currentUser
-        public async void loadLastConversation(ListView aChatListView)
+        public async Task loadLastConversation(ListView aChatListView)
         {
             //GET request to server (fetch new messages from server at the same time)
             using (HttpClient client = new HttpClient()) //using block makes the object disposable (one time use)
@@ -204,19 +204,9 @@ namespace SecureChat
             }
         }
 
-       /* public async void pullOtherUserPublicKeyFromServer()
-        {
-            HttpClient subClient = new HttpClient();
-            HttpResponseMessage subResponse = await subClient.GetAsync(otherUser.public_key);
-            HttpContent subContent = subResponse.Content;
-            string content_string2 = await subContent.ReadAsStringAsync();
-            Debug.WriteLine("PBCS:  "+content_string2);
-            dynamic incomingJSON = JsonConvert.DeserializeObject(content_string2);
-            otherUser.public_key_ACTUAL= incomingJSON.key;
-            Debug.WriteLine("PUB KEY ACTUAL:  "+otherUser.public_key_ACTUAL);
-        }*/
 
-        public async void parseSelectedConversation(string urlOfConversation)
+        //Loads the selected conversation from the friends list into chatListView (TASK METHOD INSURES ALL VARIABLES LOAD)
+        public async Task parseSelectedConversation(string urlOfConversation)
         {
             using (HttpClient client = new HttpClient()) //using block makes the object disposable (one time use)
             {

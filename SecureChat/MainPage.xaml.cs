@@ -256,11 +256,19 @@ namespace SecureChat
                                 }
                             }
                         } else {
-                            chatListView.Items.Add("INVALID CREDENTIALS");
+                            var dialog = new MessageDialog("");
+                            dialog.Title = "INVALID USER/PASSWORD COMBINATION";
+                            dialog.Content = "You have entered the wrong password for the selected user, please try again";
+                            dialog.Commands.Add(new UICommand { Label = "Ok", Id = 0 });
+                            var res = await dialog.ShowAsync();
                         }
                     }
                 }
             }
+            //Clear textbox and auto scroll to the bottom
+            inputBox.Text = String.Empty;
+            chatListViewScroller.UpdateLayout();
+            chatListViewScroller.ScrollToVerticalOffset(chatListView.ActualHeight);
         }
 
 
@@ -375,20 +383,21 @@ namespace SecureChat
 
 
         //FRIENDS SELECTION:  LOAD CONVERSATION
-        private void friendsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void friendsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
             if (friendsList.Items.Count > 0)
             {
 
                 string conversationURL = (string)friendsList.SelectedItems[0];
-                App.userManagement.parseSelectedConversation(conversationURL);
+                await App.userManagement.parseSelectedConversation(conversationURL);
                 if (App.DEBUG_MODE == true)
                 {
                     Debug.WriteLine(conversationURL);
                 }
-                App.userManagement.loadLastConversation(chatListView);
+                await App.userManagement.loadLastConversation(chatListView);
             }
+            chatListViewScroller.UpdateLayout();
+            chatListViewScroller.ScrollToVerticalOffset(chatListView.ActualHeight);
         }
 
 
@@ -443,6 +452,17 @@ namespace SecureChat
                 //DO NOTHING
                 MessageDialog msgbox2 = new MessageDialog("Cancelling request");
                 await msgbox2.ShowAsync();
+            }
+        }
+
+        private async void refersh_Click(object sender, RoutedEventArgs e)
+        {
+            if (App.userManagement.conversationIsNotNull())
+            {
+                chatListView.Items.Clear();
+                await App.userManagement.loadLastConversation(chatListView);
+                chatListViewScroller.UpdateLayout();
+                chatListViewScroller.ScrollToVerticalOffset(chatListView.ActualHeight);
             }
         }
     }
