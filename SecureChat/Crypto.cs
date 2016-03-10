@@ -80,10 +80,15 @@ namespace SecureChat
 // Class functions
         public void loadOtherUserPublicKey(string otherUserKey)
         {
-            Debug.WriteLine("DISPLAY KEY:  "+otherUserKey);
+            Debug.WriteLine("OTHER USER'S PUBLIC KEY:  "+otherUserKey);
             byte[] tempByte = new byte[512];
             tempByte = Convert.FromBase64String(otherUserKey);
-            buffPublicKey_OTHER_USER = tempByte.AsBuffer();
+            this.buffPublicKey_OTHER_USER = tempByte.AsBuffer();
+        }
+
+        public static IBuffer returnPublicKey_OTHER_USER(Crypto cryptoHolder)
+        {
+            return cryptoHolder.buffPublicKey_OTHER_USER;
         }
 
         public static IBuffer returnPublicKey(Crypto cryptoHolder)

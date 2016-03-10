@@ -164,7 +164,7 @@ namespace SecureChat
                 if(secureStatus == false) {
                     finalInput = input;
                 } else {
-                    finalInput = Crypto.Encrypt(App.strAsymmetricAlgName, Crypto.returnPublicKey(App.secrets), input);
+                    finalInput = Crypto.Encrypt(App.strAsymmetricAlgName, Crypto.returnPublicKey_OTHER_USER(App.secrets), input);
                 }
 
                 //Load the text and associated message data into a messageItem object

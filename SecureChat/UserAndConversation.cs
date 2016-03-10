@@ -99,32 +99,37 @@ namespace SecureChat
             return currentUser.public_key_ACTUAL;
         }
 
+        //RETURNS currentUser's URL link
         public string getURL_string()
         {
             return currentUser.user_url;
         }
 
+        //SET currentUser
         public void setCurrentUser(UserDetails userObject)
         {
             currentUser = userObject;
         }
 
+        //RETURNS currentConversation
         public string getConversationURL_string()
         {
             return currentConversation.conversation_url;
         }
 
-
+        //RETURNS otherUser's URL link
         public string getOtherUserURL_string()
         {
             return otherUser.user_url;
         }
 
+        //RETURNS otherUser's user name
         public string getOtherUser_string()
         {
             return otherUser.user_name;
         }
 
+        //RETURNS if a conversation exists
         public Boolean conversationIsNotNull()
         {
             if (currentConversation != null)
@@ -136,6 +141,7 @@ namespace SecureChat
             }
         }
 
+        //POPULATES friendsList with all conversations from currentUser
         public void getAvailableConversations(ListView friendsList) {
             if (currentUser != null)
             {
@@ -222,18 +228,19 @@ namespace SecureChat
                         System.Net.Http.Headers.HttpContentHeaders content_headers = content.Headers;
                         currentConversation = JsonConvert.DeserializeObject<ConversationDetails>(content_string);
 
-                        //Load the otherUser variable (person you're speaking with) by matching the currentUser's url tag with participants
+                        //Load data into the otherUser variable (person you're speaking with) by matching the currentUser's url tag with participants
                         //If they match, set the otherUser variable to the other participant in the conversation
-                        if (currentConversation.participant_1 == currentUser.user_url)
-                        {
+
+
+                        if (currentConversation.participant_1 == currentUser.user_url) {
                             HttpClient subClient = new HttpClient();
                             HttpResponseMessage subResponse = await subClient.GetAsync(this.currentConversation.participant_2);
                             HttpContent subContent = subResponse.Content;
                             string content_string2 = await subContent.ReadAsStringAsync();
                             //System.Net.Http.Headers.HttpContentHeaders content_headers2 = subContent.Headers;
                             otherUser = JsonConvert.DeserializeObject<UserDetails>(content_string2);
-                        } else if (currentConversation.participant_2 == currentUser.user_url)
-                        {
+
+                        } else if (currentConversation.participant_2 == currentUser.user_url) {
                             HttpClient subClient = new HttpClient();
                             HttpResponseMessage subResponse = await subClient.GetAsync(this.currentConversation.participant_1);
                             HttpContent subContent = subResponse.Content;
@@ -242,12 +249,12 @@ namespace SecureChat
                             otherUser = JsonConvert.DeserializeObject<UserDetails>(content_string2);
                         }
 
+                        //Loads the otherUser's public key into memory
                         {
                             HttpClient subClient = new HttpClient();
                             HttpResponseMessage subResponse = await subClient.GetAsync(otherUser.public_key);
                             HttpContent subContent = subResponse.Content;
                             string content_string2 = await subContent.ReadAsStringAsync();
-                            Debug.WriteLine("PBCS:  " + content_string2);
                             dynamic incomingJSON = JsonConvert.DeserializeObject(content_string2);
                             otherUser.public_key_ACTUAL = incomingJSON.key;
                             Debug.WriteLine("PUB KEY ACTUAL:  " + otherUser.public_key_ACTUAL);
