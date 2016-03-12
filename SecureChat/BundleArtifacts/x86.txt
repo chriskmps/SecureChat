@@ -1,2 +1,2 @@
-MainPackage=C:\Users\chris\Documents\Visual Studio 2015\Projects\SecureChat\SecureChat\bin\x86\Debug\SecureChat_1.0.5.0_x86_Debug.appx
-SymbolPackage=C:\Users\chris\Desktop\SecureChat\SecureChat_1.0.5.0_Debug_Test\SecureChat_1.0.5.0_x86_Debug.appxsym
+MainPackage=C:\Users\chris\Documents\Visual Studio 2015\Projects\SecureChat\SecureChat\bin\x86\Debug\SecureChat_1.0.6.0_x86_Debug.appx
+SymbolPackage=C:\Users\chris\Desktop\SecureChat\SecureChat_1.0.6.0_Debug_Test\SecureChat_1.0.6.0_x86_Debug.appxsym

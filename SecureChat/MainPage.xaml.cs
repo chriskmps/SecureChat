@@ -341,9 +341,11 @@ namespace SecureChat
                     friendsList.Items.Add(msg.returnObject_isEncrypted(msg).ToString());
                 }
             }          
-            catch (System.Runtime.InteropServices.COMException)
-            {
-                //Band aid 
+            catch (System.Runtime.InteropServices.COMException) {
+                if(App.DEBUG_MODE == true)
+                {
+                    Debug.WriteLine("Interop Bug detected");
+                }
             }
         }
 
